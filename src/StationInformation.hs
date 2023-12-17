@@ -4,6 +4,7 @@ module StationInformation (calculateDistance, getClosestStations, StationInforma
 
 import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
+import Data.Function ((&))
 import Data.List (sort, sortBy)
 import Data.Maybe (fromMaybe)
 import qualified Data.Ord as Ordering
@@ -47,14 +48,9 @@ instance Ord StationDistance where
   compare :: StationDistance -> StationDistance -> Ordering
   compare (StationDistance a _) (StationDistance b _) = compare a b
 
-getClosestStations :: (LatLon a) => (a, [StationInformation]) -> Maybe Int -> [StationInformation]
-getClosestStations (pos, stations) n =
-  let all_distances = map (distanceForStation pos) stations
-      -- \(a, _) (b, _) -> compare a, b
-      -- is an anonymous function that takes two tuples and compares the first values
-      sorted = sort all_distances
-      no_of_stations = fromMaybe 3 n
-   in take no_of_stations (map station sorted)
+getClosestStations :: (LatLon a) => a -> [StationInformation] -> Maybe Int -> [StationInformation]
+getClosestStations pos stations n =
+  take (fromMaybe 3 n) . map station . sort $ map (distanceForStation pos) stations
 
 distanceForStation :: (LatLon a) => a -> StationInformation -> StationDistance
 distanceForStation pos station =

@@ -43,5 +43,5 @@ getClosestStationsTest :: Test
 getClosestStationsTest =
   "getClosestStationsTest" ~: do
     -- \$ applies the function to the left to everything to the right
-    let closest_stations = getClosestStations (userPos, stations) $ Just 2
+    let closest_stations = getClosestStations userPos stations $ Just 2
     assertEqual "getClosestStationsTest: " ["526", "527"] (map station_id closest_stations)
