@@ -1,9 +1,9 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module StationStatus where
 
 import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
+import Data.List (find)
+import StationInformation (StationInformation)
 
 data StationStatus = StationStatus
   { is_installed :: Bool,
@@ -14,7 +14,7 @@ data StationStatus = StationStatus
     is_returning :: Bool,
     station_id :: String
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 instance FromJSON StationStatus where
   parseJSON (Object v) = do
@@ -27,3 +27,7 @@ instance FromJSON StationStatus where
     station_id <- v .: "station_id"
     pure $ StationStatus {..}
   parseJSON invalid = typeMismatch "StationStatus" invalid
+
+findAvailabilityForStation :: String -> [StationStatus] -> Maybe StationStatus
+findAvailabilityForStation stationId =
+  find (\s -> stationId == station_id s)

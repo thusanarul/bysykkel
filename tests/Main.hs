@@ -1,6 +1,7 @@
 module Main where
 
 import StationInformation_Test (calculateDistanceTest, getClosestStationsTest)
+import StationStatus_Test (findAvailabilityForStationTest)
 import System.Exit
 import Test.HUnit
   ( Counts (errors, failures),
@@ -19,7 +20,8 @@ main = do
     runTestTT
       ( test
           [ calculateDistanceTest,
-            getClosestStationsTest
+            getClosestStationsTest,
+            findAvailabilityForStationTest
           ]
       )
   if errors result + failures result == 0

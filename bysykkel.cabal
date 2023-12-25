@@ -66,6 +66,7 @@ test-suite tests
         bysykkel
     default-language: Haskell2010
     other-modules:
-        StationInformation_Test
+        StationInformation_Test,
+        StationStatus_Test
     default-extensions:
         DuplicateRecordFields
