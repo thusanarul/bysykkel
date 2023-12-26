@@ -33,7 +33,9 @@ library
         base ^>=4.17.2.0,
         http-conduit == 2.3.8.1,
         bytestring == 0.11.5.2,
-        aeson == 2.1.2.1
+        aeson == 2.1.2.1,
+        servant-server == 0.20.*,
+        warp == 3.3.31
     default-language: Haskell2010
     default-extensions:
         OverloadedStrings
