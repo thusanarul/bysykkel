@@ -1,9 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module StationStatus where
 
 import Data.Aeson
 import Data.Aeson.Types (typeMismatch)
 import Data.List (find)
 import Data.Maybe (mapMaybe)
+import GHC.Generics
 import StationInformation (StationInformation)
 
 data StationStatus = StationStatus
@@ -15,7 +18,9 @@ data StationStatus = StationStatus
     is_returning :: Bool,
     station_id :: String
   }
-  deriving (Show, Eq)
+  deriving (Show, Eq, Generic)
+
+instance ToJSON StationStatus
 
 instance FromJSON StationStatus where
   parseJSON (Object v) = do

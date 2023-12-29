@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
 
 module StationInformation (calculateDistance, getClosestStations, StationInformation (..)) where
@@ -8,6 +9,7 @@ import Data.Function ((&))
 import Data.List (sort, sortBy)
 import Data.Maybe (fromMaybe)
 import qualified Data.Ord as Ordering
+import GHC.Generics
 import LatLon (LatLon (..))
 
 radianConstant = pi / 180.0
@@ -21,7 +23,9 @@ data StationInformation = StationInformation
     lat :: Float,
     lon :: Float
   }
-  deriving (Show)
+  deriving (Show, Generic)
+
+instance ToJSON StationInformation
 
 instance FromJSON StationInformation where
   parseJSON (Object v) = do

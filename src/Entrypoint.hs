@@ -6,16 +6,18 @@
 
 module Entrypoint (main) where
 
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson (FromJSON (parseJSON), Value (Object), (.:))
 import Data.Aeson.Types (typeMismatch)
 import qualified Data.ByteString.Char8 as S8
-import Data.Maybe (isNothing)
+import Data.Maybe (fromJust, isJust, isNothing)
 import GHC.Generics
 import Network.HTTP.Simple (getResponseBody, httpJSON)
 import Network.Wai.Handler.Warp
 import Servant
-import StationInformation (StationInformation)
-import StationStatus (StationStatus)
+import StationInformation (StationInformation, getClosestStations, station_id)
+import StationStatus (StationStatus, findAvailabilityForStations)
+import UserPos (UserPos (UserPos, lat))
 
 apiBasePath :: String
 apiBasePath = "https://gbfs.urbansharing.com/oslobysykkel.no/"
@@ -49,28 +51,35 @@ type BysykkelAPI =
     :> QueryParam "lat" Float
     :> QueryParam "lon" Float
     :> QueryParam "count" Int
-    :> Get '[PlainText] String
+    :> Get '[JSON] [StationStatus]
     :<|> "health"
       :> Get '[PlainText] String
 
-handleAvailableStations :: Maybe Float -> Maybe Float -> Maybe Int -> Handler String
-handleAvailableStations lat lon count =
-  if isNothing lat || isNothing lon
-    then throwError err400 {errBody = "Missing lat and/or lon query parameters"}
-    else return "HEI"
+getStationStatus :: IO [StationStatus]
+getStationStatus = do
+  response <- httpJSON "https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json"
+  return $ (stations . model_data) (getResponseBody response :: Model StationStatus)
+
+handleAvailableStations :: [StationInformation] -> Maybe Float -> Maybe Float -> Maybe Int -> Handler [StationStatus]
+handleAvailableStations station_information lat lon count =
+  if isJust lat && isJust lon
+    then do
+      station_statuses <- liftIO getStationStatus
+      let pos = UserPos (fromJust lat) (fromJust lon)
+      let closest = map station_id $ getClosestStations pos station_information count
+       in return $ findAvailabilityForStations station_statuses closest
+    else throwError err400 {errBody = "Missing lat and/or lon query parameters"}
 
 handleHealth :: Handler String
 handleHealth = return "OK"
 
-server :: Server BysykkelAPI
-server = handleAvailableStations :<|> handleHealth
+server :: [StationInformation] -> Server BysykkelAPI
+server stations = handleAvailableStations stations :<|> handleHealth
 
 main :: IO ()
 main = do
   putStrLn "Bysykkel API!"
   response <- httpJSON "https://gbfs.urbansharing.com/oslobysykkel.no/station_information.json"
-  let station_information = (getResponseBody response :: Model StationInformation)
-  response <- httpJSON "https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json"
-  let station_status = (getResponseBody response :: Model StationStatus)
+  let station_information = (stations . model_data) (getResponseBody response :: Model StationInformation)
   -- this does not have to be one-liner, but it's rad yeah
-  run 8000 $ serve (Proxy :: Proxy BysykkelAPI) server
+  run 8000 $ serve (Proxy :: Proxy BysykkelAPI) (server station_information)
