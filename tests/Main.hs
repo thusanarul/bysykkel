@@ -1,6 +1,7 @@
 module Main where
 
 import StationInformation_Test (calculateDistanceTest, getClosestStationsTest)
+import StationMeta_Test (mergeTest)
 import StationStatus_Test (findAvailabilityForStationTest)
 import System.Exit
 import Test.HUnit
@@ -19,10 +20,12 @@ main = do
   result <-
     runTestTT
       ( test
-          [ calculateDistanceTest,
-            getClosestStationsTest,
-            findAvailabilityForStationTest
-          ]
+          ( [ calculateDistanceTest,
+              getClosestStationsTest,
+              findAvailabilityForStationTest
+            ]
+              ++ mergeTest
+          )
       )
   if errors result + failures result == 0
     then exitSuccess

@@ -3,7 +3,7 @@
 
 {-# HLINT ignore "Use newtype instead of data" #-}
 
-module StationMeta (merge, StationMeta (..)) where
+module StationMeta (merge, StationMeta (..), StationMetaAvailability (..), StationMetaInformation (..)) where
 
 import Data.Aeson (ToJSON)
 import Data.Aeson.Types (toJSON)
@@ -16,7 +16,7 @@ data StationMeta = StationMeta
     information :: StationMetaInformation,
     availability :: StationMetaAvailability
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
 
 data StationMetaInformation = StationMetaInformation
   { name :: String,
@@ -24,7 +24,7 @@ data StationMetaInformation = StationMetaInformation
     lat :: Float,
     lon :: Float
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
 
 instance ToJSON StationMetaInformation
 
@@ -33,7 +33,7 @@ data StationMetaAvailability = StationMetaAvailability
     num_docks_available :: Int,
     last_reported :: Int
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
 
 instance ToJSON StationMetaAvailability
 
