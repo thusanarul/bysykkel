@@ -1,12 +1,14 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# HLINT ignore "Use newtype instead of data" #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Use newtype instead of data" #-}
-
-module StationMeta (merge, StationMeta (..), StationMetaAvailability (..), StationMetaInformation (..)) where
+module StationMeta (merge, mergeAll, StationMeta (..), StationMetaAvailability (..), StationMetaInformation (..)) where
 
 import Data.Aeson (ToJSON)
 import Data.Aeson.Types (toJSON)
+import Data.List (sort)
 import GHC.Generics
 import StationInformation as SI (StationInformation (..))
 import StationStatus as SS (StationStatus (..))
@@ -16,7 +18,15 @@ data StationMeta = StationMeta
     information :: StationMetaInformation,
     availability :: StationMetaAvailability
   }
-  deriving (Show, Generic, Eq)
+  deriving (Show, Generic)
+
+instance Eq StationMeta where
+  (==) :: StationMeta -> StationMeta -> Bool
+  (==) a b = a.station_id == b.station_id
+
+instance Ord StationMeta where
+  compare :: StationMeta -> StationMeta -> Ordering
+  compare a b = compare a.station_id b.station_id
 
 data StationMetaInformation = StationMetaInformation
   { name :: String,
@@ -57,3 +67,6 @@ merge si ss =
             last_reported = SS.last_reported ss
           }
     }
+
+mergeAll :: [StationInformation] -> [StationStatus] -> [StationMeta]
+mergeAll si ss = zipWith merge (sort si) (sort ss)

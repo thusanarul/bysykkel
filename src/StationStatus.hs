@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module StationStatus where
 
@@ -18,7 +19,15 @@ data StationStatus = StationStatus
     is_returning :: Bool,
     station_id :: String
   }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Generic)
+
+instance Eq StationStatus where
+  (==) :: StationStatus -> StationStatus -> Bool
+  (==) a b = station_id a == station_id b
+
+instance Ord StationStatus where
+  compare :: StationStatus -> StationStatus -> Ordering
+  compare a b = compare (station_id a) (station_id b)
 
 instance ToJSON StationStatus
 

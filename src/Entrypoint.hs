@@ -16,7 +16,7 @@ import Network.HTTP.Simple (getResponseBody, httpJSON)
 import Network.Wai.Handler.Warp
 import Servant
 import StationInformation (StationInformation, getClosestStations, station_id)
-import StationMeta (StationMeta, merge)
+import StationMeta (StationMeta, mergeAll)
 import StationStatus (StationStatus, findAvailabilityForStations)
 import UserPos (UserPos (UserPos, lat))
 
@@ -69,7 +69,7 @@ handleAvailableStations station_information lat lon count =
       let pos = UserPos (fromJust lat) (fromJust lon)
       let closest = getClosestStations pos station_information count
       let availability = findAvailabilityForStations station_statuses $ map station_id closest
-       in return $ zipWith merge closest availability
+       in return $ mergeAll closest availability
     else throwError err400 {errBody = "Missing lat and/or lon query parameters"}
 
 handleHealth :: Handler String

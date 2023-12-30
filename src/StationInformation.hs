@@ -25,6 +25,14 @@ data StationInformation = StationInformation
   }
   deriving (Show, Generic)
 
+instance Eq StationInformation where
+  (==) :: StationInformation -> StationInformation -> Bool
+  (==) a b = station_id a == station_id b
+
+instance Ord StationInformation where
+  compare :: StationInformation -> StationInformation -> Ordering
+  compare a b = compare (station_id a) (station_id b)
+
 instance ToJSON StationInformation
 
 instance FromJSON StationInformation where
