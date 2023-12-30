@@ -58,8 +58,10 @@ getClosestStations pos stations n =
 
 distanceForStation :: (LatLon a) => a -> StationInformation -> StationDistance
 distanceForStation pos station =
-  let distance = calculateDistance pos station
-   in StationDistance {distance = distance, station = station}
+  StationDistance
+    { distance = calculateDistance pos station,
+      station = station
+    }
 
 -- Uses haversine formula: https://www.movable-type.co.uk/scripts/latlong.html
 calculateDistance :: (LatLon a) => (LatLon b) => a -> b -> Float

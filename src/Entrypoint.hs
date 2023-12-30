@@ -16,6 +16,7 @@ import Network.HTTP.Simple (getResponseBody, httpJSON)
 import Network.Wai.Handler.Warp
 import Servant
 import StationInformation (StationInformation, getClosestStations, station_id)
+import StationMeta (StationMeta, merge)
 import StationStatus (StationStatus, findAvailabilityForStations)
 import UserPos (UserPos (UserPos, lat))
 
@@ -51,7 +52,7 @@ type BysykkelAPI =
     :> QueryParam "lat" Float
     :> QueryParam "lon" Float
     :> QueryParam "count" Int
-    :> Get '[JSON] [StationStatus]
+    :> Get '[JSON] [StationMeta]
     :<|> "health"
       :> Get '[PlainText] String
 
@@ -60,14 +61,15 @@ getStationStatus = do
   response <- httpJSON "https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json"
   return $ (stations . model_data) (getResponseBody response :: Model StationStatus)
 
-handleAvailableStations :: [StationInformation] -> Maybe Float -> Maybe Float -> Maybe Int -> Handler [StationStatus]
+handleAvailableStations :: [StationInformation] -> Maybe Float -> Maybe Float -> Maybe Int -> Handler [StationMeta]
 handleAvailableStations station_information lat lon count =
   if isJust lat && isJust lon
     then do
       station_statuses <- liftIO getStationStatus
       let pos = UserPos (fromJust lat) (fromJust lon)
-      let closest = map station_id $ getClosestStations pos station_information count
-       in return $ findAvailabilityForStations station_statuses closest
+      let closest = getClosestStations pos station_information count
+      let availability = findAvailabilityForStations station_statuses $ map station_id closest
+       in return $ zipWith merge closest availability
     else throwError err400 {errBody = "Missing lat and/or lon query parameters"}
 
 handleHealth :: Handler String

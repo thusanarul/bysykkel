@@ -28,7 +28,8 @@ library
         LatLon,
         StationInformation,
         StationStatus,
-        UserPos
+        UserPos,
+        StationMeta
     build-depends:
         base ^>=4.17.2.0,
         http-conduit == 2.3.8.1,
