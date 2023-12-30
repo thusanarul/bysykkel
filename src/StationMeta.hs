@@ -69,4 +69,7 @@ merge si ss =
     }
 
 mergeAll :: [StationInformation] -> [StationStatus] -> [StationMeta]
-mergeAll si ss = zipWith merge (sort si) (sort ss)
+mergeAll si ss = zipWith merge (filter (elemInStatusList ss) si) ss
+
+elemInStatusList :: [StationStatus] -> StationInformation -> Bool
+elemInStatusList ss si = any (\x -> SS.station_id x == SI.station_id si) ss
