@@ -1,0 +1,10 @@
+# https://gist.github.com/SkYNewZ/e6435be2def3b44e61315c4f14d3bd51
+
+bysykkel.localhost {
+    header {
+        -Server
+    }
+
+    respond /health 200
+    respond "Hei"
+}
