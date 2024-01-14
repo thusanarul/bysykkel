@@ -1,0 +1,29 @@
+FROM haskell:9.8-buster AS build
+
+WORKDIR /opt/server
+
+RUN cabal update
+
+COPY bysykkel.cabal ./bysykkel.cabal
+
+RUN cabal build --only-dependencies -j4
+
+COPY . .
+
+RUN cabal install --installdir="./bin"
+
+RUN cp -L -r ./bin/bysykkel ./bin/lifted
+
+FROM debian:buster-slim
+WORKDIR /opt/server
+COPY --from=build /opt/server/bin/lifted bin/
+
+RUN apt-get update
+RUN apt-get install ca-certificates -y
+
+# RUN addgroup -S runners && adduser -S runner -G runners
+# RUN sudo chown -R runner:runners bin
+
+# USER runner
+
+CMD ["bin/lifted"]
