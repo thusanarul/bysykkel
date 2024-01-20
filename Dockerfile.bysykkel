@@ -1,4 +1,4 @@
-FROM haskell:9.8-buster AS build
+FROM docker.io/haskell:9.8-buster AS build
 
 WORKDIR /opt/server
 
@@ -14,7 +14,7 @@ RUN cabal install --installdir="./bin"
 
 RUN cp -L -r ./bin/bysykkel ./bin/lifted
 
-FROM debian:buster-slim
+FROM docker.io/debian:buster-slim
 WORKDIR /opt/server
 COPY --from=build /opt/server/bin/lifted bin/
 
